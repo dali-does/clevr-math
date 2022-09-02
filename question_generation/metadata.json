@@ -253,6 +253,30 @@
       "output": "Bool",
       "terminal": false,
       "template_only": true
+    },
+    {
+      "name": "addition",
+      "inputs": ["Object"],
+      "side_inputs": ["Relation", "Size", "Color", "Material", "Shape"],
+      "output": "Integer",
+      "terminal": false,
+      "template_only": true
+    },
+    {
+      "name": "subtraction",
+      "inputs": ["Object"],
+      "side_inputs": ["Relation", "Size", "Color", "Material", "Shape"],
+      "output": "Integer",
+      "terminal": true,
+      "template_only": true
+    },
+    {
+      "name": "choose",
+      "inputs": ["ObjectSet"],
+      "side_inputs": ["Relation", "Size", "Color", "Material", "Shape"],
+      "output": "Integer",
+      "terminal": false,
+      "template_only": true
     }
   ]
 }

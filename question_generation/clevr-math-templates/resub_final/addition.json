@@ -1,0 +1,69 @@
+[
+  {
+    "params": [
+      {"type": "Size","name": "<Z>"},
+      {"type": "Color","name": "<C>"},
+      {"type": "Material","name": "<M>"},
+      { "type": "Shape", "name": "<S>" }
+    ],
+    "text": [
+      "Add X <Z> <C> <M> <S>s. How many <Z> <C> <M> <S>s are left?"
+    ],
+    "nodes": [
+      { "type": "scene",  "inputs": [] },
+      { "type": "filter", "inputs": [ 0 ],"side_inputs": [ "<Z>","<C>","<M>", "<S>"]},
+      { "type": "count", "inputs": [ 1 ]},
+      { "type": "choose", "inputs": [ 0 ]},
+      { "inputs": [ 2, 3 ], "type": "addition" }
+    ],
+    "constraints": [
+      { "params": [ 2, 1 ], "type": "CONST_GT" },
+      { "params": [ 3, 1 ], "type": "CONST_GT" },
+      { "params": [ 4, 10 ], "type": "CONST_LEQ" }
+    ]
+  },
+  {
+    "params": [
+      {"type": "Size","name": "<Z>"},
+      {"type": "Color","name": "<C>"},
+      {"type": "Material","name": "<M>"},
+      { "type": "Shape", "name": "<S>" }
+    ],
+    "text": [
+      "Add X <Z> <C> <M> <S>s. How many <Z> <C> <M> <S>s exist?"
+    ],
+    "nodes": [
+      { "type": "scene",  "inputs": [] },
+      { "type": "filter", "inputs": [ 0 ],"side_inputs": [ "<Z>","<C>","<M>", "<S>"]},
+      { "type": "count", "inputs": [ 1 ]},
+      { "type": "choose", "inputs": [ 0 ]},
+      { "inputs": [ 2, 3 ], "type": "addition" }
+    ],
+    "constraints": [
+      { "params": [ 3, 1 ], "type": "CONST_GT" },
+      { "params": [ 4, 10 ], "type": "CONST_LEQ" }
+    ]
+  },
+  {
+    "params": [
+      {"type": "Size","name": "<Z>"},
+      {"type": "Color","name": "<C>"},
+      {"type": "Material","name": "<M>"},
+      { "type": "Shape", "name": "<S>" }
+    ],
+    "text": [
+      "Add X <Z> <C> <M> <S>s. How many objects exist?"
+    ],
+    "nodes": [
+      { "type": "scene",  "inputs": [] },
+      { "type": "filter", "inputs": [ 0 ],"side_inputs": [ "<Z>","<C>","<M>", "<S>"]},
+      { "type": "count", "inputs": [ 0 ]},
+      { "type": "choose", "inputs": [ 0 ]},
+      { "inputs": [ 2, 3 ], "type": "addition" }
+    ],
+    "constraints": [
+      { "params": [ 3, 1 ], "type": "CONST_GT" },
+      { "params": [ 4, 10 ], "type": "CONST_LEQ" }
+    ]
+  }
+]

@@ -1,0 +1,74 @@
+[
+  {
+    "params": [
+      {"type": "Color","name": "<C1>"},
+      {"type": "Shape", "name": "<S1>"},
+      {"type": "Color","name": "<C2>"},
+      {"type": "Shape", "name": "<S2>" }
+    ],
+    "text": [
+      "Subtract all <C1> <S1>s. Subtract all <C2> <S2>s. How many <S1>s are left?"
+    ],
+    "nodes": [
+      { "type": "scene",  "inputs": [] },
+      { "type": "filter_shape", "inputs": [ 0 ],"side_inputs": [ "<S1>"]},
+      { "type": "filter_color", "inputs": [ 1 ],"side_inputs": [ "<C1>"]},
+      { "type": "count", "inputs": [ 1 ]},
+      { "type": "count", "inputs": [ 2 ]},
+      { "type": "filter_shape", "inputs": [ 0 ],"side_inputs": [ "<S2>"]},
+      { "type": "filter_color", "inputs": [ 5 ],"side_inputs": [ "<C2>"]},
+      { "inputs": [ 3, 4 ], "type": "subtraction" }
+    ],
+    "constraints": [
+      { "params": [ 3, 4 ], "type": "OUT_NEQ" },
+      { "params": [ 3, 5 ], "type": "OUT_NEQ" },
+      { "params": [ "<S1>", "<S2>" ], "type": "TYPE_NEQ" }
+    ]
+  },
+  {
+    "params": [
+      {"type": "Color","name": "<C1>"},
+      {"type": "Shape", "name": "<S1>"},
+      {"type": "Color","name": "<C2>"},
+      {"type": "Shape", "name": "<S2>" }
+    ],
+    "text": [
+      "Subtract all <C1> <S1>s. How many <C2> <S2>s are left?"
+    ],
+    "nodes": [
+      { "type": "scene",  "inputs": [] },
+      { "type": "filter_shape", "inputs": [ 0 ],"side_inputs": [ "<S1>"]},
+      { "type": "filter_color", "inputs": [ 1 ],"side_inputs": [ "<C1>"]},
+      { "type": "filter_shape", "inputs": [ 0 ],"side_inputs": [ "<S2>"]},
+      { "type": "filter_color", "inputs": [ 3 ],"side_inputs": [ "<C2>"]},
+      { "inputs": [ 4 ], "type": "count" }
+    ],
+    "constraints": [
+      { "params": [ 3, 4 ], "type": "OUT_NEQ" },
+      { "params": [ 3, 5 ], "type": "OUT_NEQ" },
+      { "params": [ "<S1>", "<S2>" ], "type": "TYPE_NEQ" }
+    ]
+  },
+  {
+    "params": [
+      {"type": "Color","name": "<C1>"},
+      {"type": "Shape", "name": "<S1>"},
+      {"type": "Color","name": "<C2>"},
+      {"type": "Shape", "name": "<S2>" }
+    ],
+    "text": [
+      "Add X <C1> <S1>s. How many <C2> <S2>s exist?"
+    ],
+    "nodes": [
+      { "type": "scene",  "inputs": [] },
+      { "type": "filter", "inputs": [ 0 ],"side_inputs": [ "<C1>","<S1>"]},
+      { "type": "filter", "inputs": [ 0 ],"side_inputs": [ "<C2>","<S2>"]},
+      { "type": "choose", "inputs": [ 0 ]},
+      { "inputs": [ 2 ], "type": "count" }
+    ],
+    "constraints": [
+      { "params": [ 3, 1 ], "type": "CONST_GT" },
+      { "params": [ "<S1>", "<S2>" ], "type": "TYPE_NEQ" }
+    ]
+  }
+]

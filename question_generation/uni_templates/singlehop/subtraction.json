@@ -1,0 +1,133 @@
+[
+  {
+    "params": [
+      {"type": "Size","name": "<Z>"},
+      {"type": "Color","name": "<C>"},
+      {"type": "Material","name": "<M>"},
+      { "type": "Shape", "name": "<S>" }
+    ],
+    "text": [
+      "Subtract all <C> <S>s. How many <S>s are left?"
+    ],
+    "nodes": [
+      { "type": "scene",  "inputs": [] },
+      { "type": "filter_shape", "inputs": [ 0 ],"side_inputs": [ "<S>"]},
+      { "type": "filter_color", "inputs": [ 1 ],"side_inputs": [ "<C>"]},
+      { "type": "count", "inputs": [ 1 ]},
+      { "type": "count", "inputs": [ 2 ]},
+      { "inputs": [ 3, 4 ], "type": "subtraction" }
+    ],
+    "constraints": [
+      { "params": [ 3, 4 ], "type": "OUT_NEQ" },
+      { "params": [ 3, 5 ], "type": "OUT_NEQ" }
+    ]
+  },
+  {
+    "params": [
+      {"type": "Size","name": "<Z>"},
+      {"type": "Color","name": "<C>"},
+      {"type": "Material","name": "<M>"},
+      { "type": "Shape", "name": "<S>" },
+      {"type": "Size","name": "<Z2>"},
+      {"type": "Color","name": "<C2>"},
+      {"type": "Material","name": "<M2>"},
+      { "type": "Shape", "name": "<S2>" }
+    ],
+    "text": [
+      "Subtract all <Z> <C> <M> <S>s. How many <S>s are left?"
+    ],
+    "nodes": [
+      { "type": "scene",  "inputs": [] },
+      { "type": "filter_shape", "inputs": [ 0 ],"side_inputs": [ "<S>"]},
+      { "type": "filter_count", "inputs": [ 1 ],"side_inputs": [ "<Z>","<C>","<M>"]},
+      { "type": "count", "inputs": [ 1 ]},
+      { "inputs": [ 3, 2 ], "type": "subtraction" }
+    ],
+    "constraints": [
+      { "params": [ 3, 2 ], "type": "OUT_NEQ" },
+      { "params": [ 2, 4 ], "type": "OUT_NEQ" },
+      { "params": [ 3, 4 ], "type": "OUT_NEQ" }
+    ]
+  },
+  {
+    "params": [
+      {"type": "Color","name": "<C>"},
+      {"type": "Shape", "name": "<S>" }
+    ],
+    "text": [
+      "Subtract X <C> <S>s. How many objects are left?"
+    ],
+    "nodes": [
+      { "type": "scene",  "inputs": [] },
+      { "type": "filter_shape", "inputs": [ 0 ],"side_inputs": [ "<S>"]},
+      { "type": "filter_color", "inputs": [ 1 ],"side_inputs": [ "<C>"]},
+      { "type": "count", "inputs": [ 0 ]},
+      { "type": "choose", "inputs": [ 2 ]},
+      { "inputs": [ 3, 4 ], "type": "subtraction" }
+    ],
+    "constraints": [
+      { "params": [ 3, 4 ], "type": "OUT_NEQ" }
+    ]
+  },
+  {
+    "params": [
+      {"type": "Color","name": "<C>"},
+      {"type": "Shape", "name": "<S>" }
+    ],
+    "text": [
+      "How many <C> <S>s must be subtracted to get X <C> <S>s?",
+      "Subtract all <C> <S>s. How many were subtracted if there are Z <C> <S>s left?"
+    ],
+    "nodes": [
+      { "type": "scene",  "inputs": [] },
+      { "type": "filter_shape", "inputs": [ 0 ],"side_inputs": [ "<S>"]},
+      { "type": "filter_color", "inputs": [ 1 ],"side_inputs": [ "<C>"]},
+      { "type": "count", "inputs": [ 2 ]},
+      { "type": "choose", "inputs": [ 2 ]},
+      { "inputs": [ 3, 4 ], "type": "subtraction" }
+    ],
+    "constraints": [
+      { "params": [ 3, 4 ], "type": "OUT_NEQ" }
+    ]
+  },
+  {
+    "params": [
+      {"type": "Color","name": "<C>"},
+      {"type": "Shape", "name": "<S>" }
+    ],
+    "text": [
+      "Subtract all <C> <S>s. How many objects are left?"
+    ],
+    "nodes": [
+      { "type": "scene",  "inputs": [] },
+      { "type": "filter_shape", "inputs": [ 0 ],"side_inputs": [ "<S>"]},
+      { "type": "filter_count", "inputs": [ 1 ],"side_inputs": [ "<C>"]},
+      { "type": "count", "inputs": [ 0 ]},
+      { "inputs": [ 3, 2 ], "type": "subtraction" }
+    ],
+    "constraints": [
+      { "params": [ 3, 2 ], "type": "OUT_NEQ" },
+      { "params": [ 2, 4 ], "type": "OUT_NEQ" },
+      { "params": [ 3, 4 ], "type": "OUT_NEQ" }
+    ]
+  },
+  {
+    "params": [
+      { "type": "Shape", "name": "<S>" }
+    ],
+    "text": [
+      "Subtract X <S>s. How many <S>s are left?"
+    ],
+    "nodes": [
+      { "type": "scene",  "inputs": [] },
+      { "type": "filter_shape", "inputs": [ 0 ],"side_inputs": [ "<S>"]},
+      { "type": "choose", "inputs": [ 1 ]},
+      { "type": "count", "inputs": [ 1 ]},
+      { "inputs": [ 3, 2 ], "type": "subtraction" }
+    ],
+    "constraints": [
+      { "params": [ 3, 4 ], "type": "OUT_NEQ" },
+      { "params": [ 3, 5 ], "type": "OUT_NEQ" }
+    ]
+  }
+]

@@ -5,7 +5,7 @@
 # LICENSE file in the root directory of this source tree. An additional grant
 # of patent rights can be found in the PATENTS file in the same directory.
 
-import json, os, math
+import json, os, math, random
 from collections import defaultdict
 
 """
@@ -64,7 +64,7 @@ def relate_handler(scene_struct, inputs, side_inputs):
   assert len(side_inputs) == 1
   relation = side_inputs[0]
   return scene_struct['relationships'][relation][inputs[0]]
-    
+
 
 def union_handler(scene_struct, inputs, side_inputs):
   assert len(inputs) == 2
@@ -143,6 +143,53 @@ def greater_than_handler(scene_struct, inputs, side_inputs):
   assert len(side_inputs) == 0
   return inputs[0] > inputs[1]
 
+def make_same_attr_handler(attribute):
+  def same_attr_handler(scene_struct, inputs, side_inputs):
+    cache_key = '_same_%s' % attribute
+    if cache_key not in scene_struct:
+      cache = {}
+      for i, obj1 in enumerate(scene_struct['objects']):
+        same = []
+        for j, obj2 in enumerate(scene_struct['objects']):
+          if i != j and obj1[attribute] == obj2[attribute]:
+            same.append(j)
+        cache[i] = same
+      scene_struct[cache_key] = cache
+    cache = scene_struct[cache_key]
+    assert len(inputs) == 1
+    assert len(side_inputs) == 0
+    return cache[inputs[0]]
+  return same_attr_handler
+
+def subtraction_handler(scene_struct, inputs, side_inputs):
+  assert len(inputs) == 2
+  assert len(side_inputs) == 0
+  difference = inputs[0] - inputs[1]
+  return difference
+
+def addition_handler(scene_struct, inputs, side_inputs):
+  assert len(inputs) == 2
+  assert len(side_inputs) == 0
+  return inputs[0] + inputs[1]
+
+def choose_handler(scene_struct, inputs, side_inputs):
+  assert len(inputs) == 1
+  c = len(inputs[0])
+  if c < 1:
+    return 0
+  return random.randint(1,c)
+
+def replicate_handler(scene_struct, inputs, side_inputs):
+  assert len(inputs) == 2
+  diff = len(inputs[0]) - len(inputs[1])
+  if diff < 1:
+    return 0
+  return random.randint(1,diff)
+
+
+def count_handler(scene_struct, inputs, side_inputs):
+  assert len(inputs) == 1
+  return len(inputs[0])
 
 # Register all of the answering handlers here.
 # TODO maybe this would be cleaner with a function decorator that takes
@@ -177,6 +224,11 @@ execute_handlers = {
   'same_shape': make_same_attr_handler('shape'),
   'same_size': make_same_attr_handler('size'),
   'same_material': make_same_attr_handler('material'),
+  # CLEVR-math handlers
+  'addition': addition_handler,
+  'subtraction': subtraction_handler,
+  'choose': choose_handler,
+  'replicate': replicate_handler,
 }
 
 
@@ -191,6 +243,9 @@ def answer_question(question, metadata, scene_struct, all_outputs=False,
   (such as during question-generation DFS). This will NOT work if the same
   nodes are executed on different scenes.
   """
+
+
+
   all_input_types, all_output_types = [], []
   node_outputs = []
   for node in question['nodes']:

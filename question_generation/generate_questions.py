@@ -264,10 +264,22 @@ def instantiate_templates_dfs(scene_struct, template, metadata, answer_counts,
     # Check to make sure constraints are satisfied for the current state
     skip_state = False
     for constraint in template['constraints']:
-      if constraint['type'] == 'NEQ':
+      if constraint['type'] == 'CONST_TYPE_NEQ':
+        p1, p2 = constraint['params']
+        t1 = state['vals'].get(p1)
+        if t1 is not None and t1 == p2:
+          skip_state = True
+          break
+      elif constraint['type'] == 'TYPE_NEQ':
+        p1, p2 = constraint['params']
+        t1, t2 = state['vals'].get(p1), state['vals'].get(p2)
+        if t1 is not None and t2 is not None and t1 == t2:
+          skip_state = True
+          break
+      elif constraint['type'] == 'NEQ':
         p1, p2 = constraint['params']
         v1, v2 = state['vals'].get(p1), state['vals'].get(p2)
-        if v1 is not None and v2 is not None and v1 != v2:
+        if v1 is not None and v2 is not None and v1 == v2:
           if verbose:
             print('skipping due to NEQ constraint')
             print(constraint)
@@ -300,6 +312,36 @@ def instantiate_templates_dfs(scene_struct, template, metadata, answer_counts,
             print(outputs[j])
           skip_state = True
           break
+      elif constraint['type'] == 'CONST_NEQ':
+        i, c = constraint['params']
+        i = state['input_map'].get(i, None)
+        if i is not None and c is not None and outputs[i] == c:
+          if verbose:
+            print('skipping due to CONST_NEQ constraint')
+            print(outputs[i])
+            print(outputs[j])
+          skip_state = True
+          break
+      elif constraint['type'] == 'CONST_GT':
+        i, c = constraint['params']
+        i = state['input_map'].get(i, None)
+        if i is not None and c is not None and outputs[i] < c:
+          if verbose:
+            print('skipping due to CONST_GT constraint')
+            print(outputs[i])
+            print(outputs[j])
+          skip_state = True
+          break
+      elif constraint['type'] == 'CONST_LEQ':
+        i, c = constraint['params']
+        i = state['input_map'].get(i, None)
+        if i is not None and c is not None and outputs[i] > c:
+          if verbose:
+            print('skipping due to CONST_LEQ constraint')
+            print(outputs[i])
+            print(outputs[j])
+          skip_state = True
+          break
       else:
         assert False, 'Unrecognized constraint type "%s"' % constraint['type']
 
@@ -312,6 +354,8 @@ def instantiate_templates_dfs(scene_struct, template, metadata, answer_counts,
     if state['next_template_node'] == len(template['nodes']):
       # Use our rejection sampling heuristics to decide whether we should
       # keep this template instantiation
+      if answer < 0:
+        import ipdb; ipdb.set_trace()
       cur_answer_count = answer_counts[answer]
       answer_counts_sorted = sorted(answer_counts.values())
       median_count = answer_counts_sorted[len(answer_counts_sorted) // 2]
@@ -435,9 +479,7 @@ def instantiate_templates_dfs(scene_struct, template, metadata, answer_counts,
         })
 
     elif 'side_inputs' in next_node:
-      # If the next node has template parameters, expand them out
-      # TODO: Generalize this to work for nodes with more than one side input
-      assert len(next_node['side_inputs']) == 1, 'NOT IMPLEMENTED'
+      # If the next node has template parameters, expand them out TODO: Generalize this to work for nodes with more than one side input assert len(next_node['side_inputs']) == 1, 'NOT IMPLEMENTED'
 
       # Use metadata to figure out domain of valid values for this parameter.
       # Iterate over the values in a random order; then it is safe to bail
@@ -481,8 +523,6 @@ def instantiate_templates_dfs(scene_struct, template, metadata, answer_counts,
   # Actually instantiate the template with the solutions we've found
   text_questions, structured_questions, answers = [], [], []
   for state in final_states:
-    structured_questions.append(state['nodes'])
-    answers.append(state['answer'])
     text = random.choice(template['text'])
     for name, val in state['vals'].items():
       if val in synonyms:
@@ -492,10 +532,41 @@ def instantiate_templates_dfs(scene_struct, template, metadata, answer_counts,
     text = replace_optionals(text)
     text = ' '.join(text.split())
     text = other_heuristic(text, state['vals'])
+    if " X " in text:
+      c, state = get_chosen(state)
+      text = text.replace(" X "," {} ".format(c))
+    structured_questions.append(state['nodes'].copy())
+    answers.append(state['answer'])
     text_questions.append(text)
 
   return text_questions, structured_questions, answers
 
+def get_chosen(question):
+  # TODO should be only one choose in the program
+  program = question['nodes']
+  c = 1
+  for node in program:
+    #TODO ugly workaround for NS-VQA to have access to randomised number
+    if node['type'] == 'choose':
+      c = node['_output']
+      node['value_inputs'] = [str(c)]
+  question['nodes'] = program
+  return c, question
+
+def get_added(question):
+  program = question['nodes']
+  answer = question['answer']
+  addition = program[-1]
+  before_add = program[addition['inputs'][0]]['_output']
+  added = answer - before_add
+  return answer, added
+
+def get_removed(question):
+  program = question['nodes']
+  answer = question['answer']
+  subtraction = program[-1]
+  x = program[subtraction['inputs'][1]]['_output']
+  return answer, x
 
 
 def replace_optionals(s):
@@ -675,7 +746,8 @@ def main(args):
         f['value_inputs'] = f['side_inputs']
         del f['side_inputs']
       else:
-        f['value_inputs'] = []
+        if f['type'] != 'choose':
+          f['value_inputs'] = []
 
   with open(args.output_questions_file, 'w') as f:
     print('Writing output to %s' % args.output_questions_file)

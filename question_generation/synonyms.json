@@ -11,5 +11,14 @@
   "behind": ["behind"],
   "front": ["in front of"],
   "above": ["above"],
-  "below": ["below"]
+  "below": ["below"],
+  "Subtract": ["Subtract", "Take away", "Remove", "Withdraw"],
+  "subtract": ["subtract", "take away", "remove", "withdraw"],
+  "subtracted": ["subtracted", "taken away","removed", "withdrawn"],
+  "Add": ["Add", "Introduce", "Insert"],
+  "add": ["add", "introduce", "insert"],
+  "added": ["added", "introduced", "inserted"],
+  "all": ["all", "every"],
+  "left": ["left", "there"],
+  "exist": ["exist", "are there"]
 }

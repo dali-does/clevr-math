@@ -1,0 +1,37 @@
+[
+  {
+    "params": [
+      {"type": "Size","name": "<Z>"},
+      {"type": "Color","name": "<C>"},
+      {"type": "Material","name": "<M>"},
+      { "type": "Shape", "name": "<S>" },
+      {"type": "Size","name": "<Z2>"},
+      {"type": "Color","name": "<C2>"},
+      {"type": "Material","name": "<M2>"},
+      { "type": "Shape", "name": "<S2>" }
+    ],
+    "text": [
+      "Subtract all <Z> <C> <M> <S>s. Subtract all <Z2> <C2> <M2> <S2>s. How many objects are left?"
+    ],
+    "nodes": [
+      { "type": "scene",  "inputs": [] },
+      { "type": "filter", "inputs": [ 0 ],"side_inputs": [ "<Z>", "<C>", "<M>", "<S>" ]},
+      { "type": "filter", "inputs": [ 0 ],"side_inputs": [ "<Z2>", "<C2>", "<M2>", "<S2>" ]},
+      { "type": "intersect", "inputs": [ 1, 2 ]},
+      { "type": "count", "inputs": [ 0 ]}, -- scene
+      { "type": "count", "inputs": [ 1 ]}, -- first sub
+      { "type": "count", "inputs": [ 2 ]}, -- second sub
+      { "type": "count", "inputs": [ 3 ]}, -- intersection
+      { "inputs": [ 4, 5 ], "type": "subtraction" }, -- remove first set
+      { "inputs": [ 6, 7 ], "type": "subtraction" }, -- remove intersection from second set
+      { "inputs": [ 8, 9 ], "type": "subtraction" }, -- subtract second set from first sub
+
+    ],
+    "constraints": [
+      { "params": [ 1, 2 ], "type": "NEQ" },
+      { "params": [ 4, 0 ], "type": "CONST_GT" },
+      { "params": [ 5, 0 ], "type": "CONST_GT" },
+      { "params": [ 7, 0 ], "type": "CONST_GT" }
+    ]
+  }
+]
