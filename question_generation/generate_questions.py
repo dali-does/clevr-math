@@ -52,7 +52,7 @@ parser.add_argument('--metadata_file', default='metadata.json',
     help="JSON file containing metadata about functions")
 parser.add_argument('--synonyms_json', default='synonyms.json',
     help="JSON file defining synonyms for parameter values")
-parser.add_argument('--template_dir', default='CLEVR_1.0_templates',
+parser.add_argument('--template_dir', default='clevr-math-templates',
     help="Directory containing JSON templates for questions")
 
 # Output
