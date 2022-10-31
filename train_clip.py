@@ -68,7 +68,7 @@ if __name__ == "__main__":
   parser.add_argument('--train_samples', type=int, default=10000)
   parser.add_argument('--val_samples', type=int, default=2000)
   parser.add_argument('--test_samples', type=int, default=5000)
-  parser.add_argument('--name', type=str, default='clevr-math')
+  parser.add_argument('--name', type=str, default='general')
   parser.add_argument('--cachedir', type=str, default=None)
   args = parser.parse_args()
 
@@ -93,19 +93,19 @@ if __name__ == "__main__":
     dl_config = DownloadConfig(resume_download=True, num_proc=8,
             force_download=True)
     logging.info('Loading training data')
-    dataset_train = load_dataset('clevr-math-loader.py',
+    dataset_train = load_dataset('dali-does/clevr-math',
             name=args.name,
             download_config=dl_config,
             split='train[:{}]'.format(args.train_samples),
             cache_dir='/scratch/dali/clevrcache/')
     logging.info('Loading validation data')
-    dataset_val = load_dataset('clevr-math-loader.py',
+    dataset_val = load_dataset('dali-does/clevr-math',
             name=args.name,
             download_config=dl_config,
             split='validation[:{}]'.format(args.val_samples),
             cache_dir='/scratch/dali/clevrcache/')
     logging.info('Loading test data')
-    dataset_test = load_dataset('clevr-math-loader.py',
+    dataset_test = load_dataset('dali-does/clevr-math',
             name=args.name,
             download_config=dl_config,
             split='test[:{}]'.format(args.test_samples),
