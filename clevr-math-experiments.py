@@ -35,7 +35,14 @@ def parse_clevr_math_arguments():
   parser.add_argument('--test_samples', type=int, default=5000)
   parser.add_argument('--name', type=str, default='general')
   parser.add_argument('--cachedir', type=str, default=None)
+  parser.add_argument('--save_to_tensorboard', type=bool, default=True)
   return parser.parse_args()
+
+def compute_attribute_stats(dataset, indices):
+    stats = {}
+    # 1-gram
+    # 2-gram
+    return stats
 
 def load_vilt(model_path, num_labels):
     id2label = {}
@@ -67,6 +74,8 @@ def preprocess_data(dataset, model_path):
                      images=e['image'],
                      padding='max_length')
   dataset = dataset.map(transform_tokenize,
+                        #        cache_file_names=cache_file_names,
+                        #        keep_in_memory=True,
                         batched=True,
                         num_proc=8
                         )
@@ -84,7 +93,7 @@ def preprocess_data_otf(dataset, extractor):
                      images=e['image'],
                      padding='max_length',
                      return_tensors='pt')
-    extracts['label'] = e['label']
+    extracts['label'] = e['label']#[onehot_label(label) for label in e['label']]
     return extracts
   return dataset.with_transform(transform_tokenize)
 
@@ -96,7 +105,11 @@ def create_metric(metric):
     return metric.compute(predictions=predictions, references=labels)
   return compute_metrics
 
-def setup_trainer(model, train_dataset, eval_dataset, metric):
+def setup_trainer(model, train_dataset, eval_dataset, metric, args):
+  callbacks = []
+  if args.save_to_tensorboard:
+    callbacks.append('tensorboard')
+      
   training_args = TrainingArguments("clip_trainer",
                                     num_train_epochs=args.epochs,
                                     per_device_train_batch_size=64,
@@ -105,6 +118,7 @@ def setup_trainer(model, train_dataset, eval_dataset, metric):
                                     dataloader_pin_memory=8,
                                     gradient_accumulation_steps=1,
                                     save_strategy='no',
+                                    report_to=callbacks,
                                     evaluation_strategy='epoch',
                                     remove_unused_columns=False,
                                     eval_steps=1)
@@ -182,7 +196,8 @@ def experiment():
   dataset = preprocess_data(dataset)
 
   metric = create_metric('accuracy')
-  trainer = setup_trainer(model_path, dataset['train'], dataset['validation'], metric)
+  trainer = setup_trainer(model_path, dataset['train'], dataset['validation'],
+                          metric, args)
 
   training_metrics = trainer.train()
 
@@ -199,7 +214,8 @@ def cogent_experiment():
 
   for ratio in ratios:
     dataset_mixed = mix_datasets(dataset['trainB'], dataset['trainA'], ratio, split='train')
-    trainer = setup_trainer(model_path, dataset_mixed['train'], dataset['valA'], metric)
+    trainer = setup_trainer(model_path, dataset_mixed['train'],
+                            dataset['valA'], metric, args)
     training_metrics = trainer.train()
     evaluate_model(trainer, dataset['testB'], '{}-cogent'.format(ratio))
 
@@ -216,7 +232,9 @@ if __name__ == "__main__":
   )
 
   model_path = "openai/clip-vit-base-patch32"
+  #model_path = "dandelin/vilt-b32-finetuned-vqa"
   processor = CLIPProcessor.from_pretrained(model_path)
+  #processor = ViltProcessor.from_pretrained(model_path)
 
   logging.info("Loading dataset")
   if args.data_path:
@@ -227,24 +245,47 @@ if __name__ == "__main__":
     logging.info('Loading training data')
     dataset_train = load_dataset('dali-does/clevr-math',
             name=args.name,
+            revision='comp-gen',
             download_config=dl_config,
-            split='train[:{}]'.format(args.train_samples))
+            split='trainA[:{}]'.format(args.train_samples))#,
+            #cache_dir=args.cachedir)
     logging.info('Loading validation data')
     dataset_val = load_dataset('dali-does/clevr-math',
             name=args.name,
+            revision='comp-gen',
             download_config=dl_config,
-            split='validation[:{}]'.format(args.val_samples))
+            split='valA[:{}]'.format(args.val_samples))#,
+            #cache_dir=args.cachedir)
     logging.info('Loading test data')
-    dataset_test = load_dataset('dali-does/clevr-math',
+    dataset_testA = load_dataset('dali-does/clevr-math',
             name=args.name,
+            revision='comp-gen',
             download_config=dl_config,
-            split='test[:{}]'.format(args.test_samples))
+            split='testA[:{}]'.format(args.test_samples))#,
+            #cache_dir=args.cachedir)
     logging.info('Dataset loaded')
+    dataset_testB = load_dataset('dali-does/clevr-math',
+            name=args.name,
+            revision='comp-gen',
+            download_config=dl_config,
+            split='testB[:{}]'.format(args.test_samples))#,
+            #cache_dir=args.cachedir)
 
+    dataset_train = dataset_train.filter(lambda e:
+                                         'sphere' not in e['question'],
+                                        num_proc=8)
+    dataset_val = dataset_val.filter(lambda e:
+                                         'sphere' not in e['question'],
+                                        num_proc=8)
+    dataset_testB = dataset_testB.filter(lambda e:
+                                         'sphere' not in e['question'],
+                                        num_proc=8)
     dataset = DatasetDict({
       'train':dataset_train,
       'validation':dataset_val,
-      'test':dataset_test
+      'test':dataset_testB,
+      'testA':dataset_testA,
+      'testB':dataset_testB
     })
 
 
@@ -253,11 +294,16 @@ if __name__ == "__main__":
       dataset.save_to_disk(args.save_to_disk)
 
   metric = create_metric('accuracy')
-  model = ClipClassification(model_path, 11)
+  #model = ViltForQuestionAnswering.from_pretrained(model_path)
+  #model = load_vilt(model_path, 11)
+  model = ClipClassification(model_path, 11, use_text=False)
   trainer = setup_trainer(model, dataset['train'],
-                                   dataset['validation'], metric)
+                                   dataset['validation'], metric, args)
 
   training_metrics = trainer.train()
 
-  test_metrics = evaluate_model(trainer, dataset['test'], 'general')
+  #trainer.evaluate(dataset['test'])
+  test_metrics = evaluate_model(trainer, dataset['testA'], 'general')
+  logging.info(test_metrics)
+  test_metrics = evaluate_model(trainer, dataset['testB'], 'general')
   logging.info(test_metrics)
