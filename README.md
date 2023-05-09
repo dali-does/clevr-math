@@ -24,7 +24,7 @@ See the original instructions for generating data with CLEVR: [README_CLEVR.md](
 
 ## CLIP
 
-`python train_clip.py --eopchs 10 --train_samples 10000 --val_samples 1000 --test_samples 2000`
+`python train_clip.py --epochs 10 --train_samples 10000 --val_samples 1000 --test_samples 2000`
 
 ## NS-VQA
 
